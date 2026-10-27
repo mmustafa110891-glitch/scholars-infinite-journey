@@ -1,1 +1,266 @@
+<!DOCTYPE html><html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholar's Infinite Journey</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: linear-gradient(145deg, #071b35, #123d50, #07352f);
+      min-height: 100vh;
+    }
+    header {
+      padding: 22px 16px;
+      text-align: center;
+      background: #071526;
+      border-bottom: 2px solid #26d9a0;
+    }
+    header h1 { font-size: 25px; margin: 5px 0; }
+    header p { color: #b8d9d5; margin-bottom: 0; }
+    main { max-width: 650px; margin: auto; padding: 20px; }
+    .card {
+      background: #ffffff12;
+      border: 1px solid #ffffff30;
+      border-radius: 18px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 8px 25px #0003;
+    }
+    h2 { color: #62f2c2; }
+    button, select {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    button {
+      background: #22c997;
+      color: #06251e;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .subject {
+      background: #173f51;
+      color: white;
+      border: 1px solid #438b87;
+      text-align: left;
+    }
+    .muted { color: #c5d8df; line-height: 1.6; }
+    #quiz { display: none; }
+    .option {
+      background: #173f51;
+      color: white;
+      border: 1px solid #438b87;
+      text-align: left;
+    }
+    .option.selected { background: #167b63; border: 2px solid #62f2c2; }
+    #feedback { line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌟 Scholar's Infinite Journey</h1>
+    <p>Learn • Think • Progress</p>
+  </header>  <main>
+    <section id="home">
+      <div class="card">
+        <h2>السلام عليكم!</h2>
+        <p>आपकी इल्मी यात्रा में स्वागत है।</p>
+        <label for="language">भाषा चुनें / Choose language</label>
+        <select id="language" onchange="changeLanguage()">
+          <option value="hi">हिन्दी</option>
+          <option value="en">English</option>
+          <option value="ur">اردو</option>
+          <option value="roman">Roman Urdu</option>
+        </select>
+      </div>  <div class="card">
+    <h2 id="subjectsTitle">📚 अपने विषय चुनें</h2>
+    <p class="muted">किसी विषय पर टैप करके क्विज़ शुरू करें।</p>
+    <div id="subjects"></div>
+  </div>
+</section>
 
+<section id="quiz" class="card">
+  <button onclick="goHome()" class="subject">← Home</button>
+  <h2 id="subjectName"></h2>
+  <p id="progress" class="muted"></p>
+  <h3 id="question"></h3>
+  <div id="options"></div>
+  <button id="confirm" onclick="checkAnswer()">जवाब पक्का करें</button>
+  <p id="feedback"></p>
+  <button id="next" onclick="nextQuestion()" style="display:none">अगला सवाल →</button>
+</section>
+
+  </main>  <script>
+    const subjects = [
+      "Qur’an Studies", "Hadith Studies", "Aqeedah", "Fiqh",
+      "Seerah", "Arabic Language", "Islamic History"
+    ];
+
+    const translations = {
+      hi: {
+        title: "📚 अपने विषय चुनें", start: "शुरू करें",
+        confirm: "जवाब पक्का करें", next: "अगला सवाल →",
+        correct: "✅ सही जवाब!", wrong: "❌ सही जवाब:",
+        completed: "🎆 इस शुरुआती डेमो के सवाल पूरे हुए!",
+        questions: [
+          ["इस्लाम के पाँच अरकान कितने हैं?", ["तीन", "चार", "पाँच", "छह"], 2],
+          ["क़ुरआन किस नबी पर नाज़िल हुआ?", ["मूसा عليه السلام", "ईसा عليه السلام", "मुहम्मद ﷺ", "इब्राहीम عليه السلام"], 2],
+          ["दिन में फ़र्ज़ नमाज़ें कितनी हैं?", ["तीन", "चार", "पाँच", "छह"], 2]
+        ]
+      },
+      en: {
+        title: "📚 Choose a subject", start: "Start",
+        confirm: "Confirm answer", next: "Next question →",
+        correct: "✅ Correct!", wrong: "❌ Correct answer:",
+        completed: "🎆 Demo questions completed!",
+        questions: [
+          ["How many pillars of Islam are there?", ["Three", "Four", "Five", "Six"], 2],
+          ["To which Prophet was the Qur’an revealed?", ["Musa", "Isa", "Muhammad ﷺ", "Ibrahim"], 2],
+          ["How many obligatory daily prayers are there?", ["Three", "Four", "Five", "Six"], 2]
+        ]
+      },
+      ur: {
+        title: "📚 اپنا مضمون منتخب کریں", start: "شروع کریں",
+        confirm: "جواب پکا کریں", next: "اگلا سوال →",
+        correct: "✅ درست جواب!", wrong: "❌ درست جواب:",
+        completed: "🎆 ابتدائی سوالات مکمل ہوگئے!",
+        questions: [
+          ["اسلام کے ارکان کتنے ہیں؟", ["تین", "چار", "پانچ", "چھ"], 2],
+          ["قرآن کس نبی پر نازل ہوا؟", ["موسیٰ علیہ السلام", "عیسیٰ علیہ السلام", "محمد ﷺ", "ابراہیم علیہ السلام"], 2],
+          ["روزانہ فرض نمازیں کتنی ہیں؟", ["تین", "چار", "پانچ", "چھ"], 2]
+        ]
+      },
+      roman: {
+        title: "📚 Apna subject chunein", start: "Shuru karein",
+        confirm: "Jawab pakka karein", next: "Agla sawal →",
+        correct: "✅ Sahi jawab!", wrong: "❌ Sahi jawab:",
+        completed: "🎆 Ibtidai sawalat mukammal!",
+        questions: [
+          ["Islam ke arkaan kitne hain?", ["Teen", "Chaar", "Paanch", "Chhe"], 2],
+          ["Qur’an kis Nabi par nazil hua?", ["Musa", "Isa", "Muhammad ﷺ", "Ibrahim"], 2],
+          ["Rozana farz namazein kitni hain?", ["Teen", "Chaar", "Paanch", "Chhe"], 2]
+        ]
+      }
+    };
+
+    let language = "hi";
+    let currentSubject = "";
+    let questionIndex = 0;
+    let selectedOption = null;
+    let correctCount = 0;
+    let score = 0;
+    let answered = false;
+
+    function changeLanguage() {
+      language = document.getElementById("language").value;
+      renderSubjects();
+      document.getElementById("subjectsTitle").textContent = translations[language].title;
+      if (document.getElementById("quiz").style.display === "block") {
+        showQuestion();
+      }
+    }
+
+    function renderSubjects() {
+      const container = document.getElementById("subjects");
+      container.innerHTML = "";
+      subjects.forEach(subject => {
+        const button = document.createElement("button");
+        button.className = "subject";
+        button.textContent = "📖 " + subject + "  →";
+        button.onclick = () => startQuiz(subject);
+        container.appendChild(button);
+      });
+    }
+
+    function startQuiz(subject) {
+      currentSubject = subject;
+      questionIndex = 0;
+      correctCount = 0;
+      score = 0;
+      document.getElementById("home").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("subjectName").textContent = "📘 " + subject;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const data = translations[language];
+      const q = data.questions[questionIndex];
+      selectedOption = null;
+      answered = false;
+      document.getElementById("progress").textContent =
+        "Question " + (questionIndex + 1) + " / " + data.questions.length +
+        "  |  Correct: " + correctCount + "  |  XP: " + score;
+      document.getElementById("question").textContent = q[0];
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("confirm").textContent = data.confirm;
+      document.getElementById("confirm").style.display = "block";
+      document.getElementById("next").style.display = "none";
+      const options = document.getElementById("options");
+      options.innerHTML = "";
+      q[1].forEach((text, i) => {
+        const button = document.createElement("button");
+        button.className = "option";
+        button.textContent = String.fromCharCode(65 + i) + ". " + text;
+        button.onclick = () => {
+          if (answered) return;
+          selectedOption = i;
+          document.querySelectorAll(".option").forEach(b => b.classList.remove("selected"));
+          button.classList.add("selected");
+        };
+        options.appendChild(button);
+      });
+    }
+
+    function checkAnswer() {
+      if (answered) return;
+      if (selectedOption === null) {
+        document.getElementById("feedback").textContent =
+          language === "en" ? "Choose an answer first." : "पहले एक जवाब चुनिए।";
+        return;
+      }
+      answered = true;
+      const data = translations[language];
+      const q = data.questions[questionIndex];
+      const feedback = document.getElementById("feedback");
+      if (selectedOption === q[2]) {
+        correctCount++;
+        score += 10;
+        feedback.textContent = data.correct + " +10 XP";
+      } else {
+        feedback.textContent = data.wrong + " " + q[1][q[2]];
+      }
+      document.getElementById("progress").textContent =
+        "Question " + (questionIndex + 1) + " / " + data.questions.length +
+        "  |  Correct: " + correctCount + "  |  XP: " + score;
+      document.getElementById("confirm").style.display = "none";
+      document.getElementById("next").style.display = "block";
+      document.getElementById("next").textContent =
+        questionIndex === data.questions.length - 1 ? data.completed : data.next;
+    }
+
+    function nextQuestion() {
+      if (questionIndex >= translations[language].questions.length - 1) {
+        document.getElementById("feedback").textContent =
+          translations[language].completed;
+        document.getElementById("next").style.display = "none";
+        return;
+      }
+      questionIndex++;
+      showQuestion();
+    }
+
+    function goHome() {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("home").style.display = "block";
+    }
+
+    renderSubjects();
+  </script></body>
+</html>
